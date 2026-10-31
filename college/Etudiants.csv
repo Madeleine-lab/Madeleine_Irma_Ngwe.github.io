@@ -1,0 +1,18 @@
+Num_Etudiant,Prenom,Nom,Etape,Cours et Notes actuels,Moyenne_Actuelle
+300002,Eliseo,Roman,3,"{'BD': 0.0, 'Programmation': 0.0, 'Stats': 0.0}",0.0
+300004,Emmaline,Fernandez,4,"{'SGBD': 0.0, 'Programmation A.': 0.0, 'Stats A.': 0.0}",0.0
+300005,Morgan,Henderson,2,"{'Info': 0.0, 'SD': 0.0, 'Maths A.': 0.0}",0.0
+300006,Caroline,Benton,2,"{'Info': 0.0, 'SD': 0.0, 'Maths A.': 0.0}",0.0
+300007,Leandro,Rodgers,4,"{'SGBD': 0.0, 'Programmation A.': 0.0, 'Stats A.': 0.0}",0.0
+300008,Bryce,Case,4,"{'SGBD': 0.0, 'Programmation A.': 0.0, 'Stats A.': 0.0}",0.0
+300009,Camila,Morse,4,"{'SGBD': 0.0, 'Programmation A.': 0.0, 'Stats A.': 0.0}",0.0
+300010,Jaiden,Stout,2,"{'Info': 0.0, 'SD': 0.0, 'Maths A.': 0.0}",0.0
+300011,Khari,Hanson,2,"{'Info': 0.0, 'SD': 0.0, 'Maths A.': 0.0}",0.0
+300012,Tanner,Roy,3,"{'BD': 0.0, 'Programmation': 0.0, 'Stats': 0.0}",0.0
+300014,Eduardo,Fletcher,2,"{'Info': 0.0, 'SD': 0.0, 'Maths A.': 0.0}",0.0
+300015,Aidan,Villegas,3,"{'BD': 0.0, 'Programmation': 0.0, 'Stats': 0.0}",0.0
+300016,Hallie,Hogan,3,"{'BD': 0.0, 'Programmation': 0.0, 'Stats': 0.0}",0.0
+300017,Skyla,Compton,2,"{'Info': 0.0, 'SD': 0.0, 'Maths A.': 0.0}",0.0
+300018,Darian,Kirk,3,"{'BD': 0.0, 'Programmation': 0.0, 'Stats': 0.0}",0.0
+300020,Ermias,Delgado,2,"{'Info': 0.0, 'SD': 0.0, 'Maths A.': 0.0}",0.0
+300021,Joseph,reme,4,"{'SGBD': 0.0, 'Programmation A.': 0.0, 'Stats A.': 0.0}",0.0

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Académique - Système de Notation</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
+        <div>
+            <!-- Header Logo -->
+            <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+                <div class="bg-brand-600 p-2.5 rounded-xl text-white shadow-lg shadow-brand-500/30">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-white">Academy</h1>
+                    <p class="text-xs text-slate-400">Système de Notation</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-4 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-brand-600 text-white">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Tableau de Bord
+                </button>
+                <button onclick="switchTab('students')" id="nav-students" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Étudiants & Dossiers
+                </button>
+                <button onclick="switchTab('courses')" id="nav-courses" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    Catalogue des Cours
+                </button>
+                <button onclick="switchTab('actions')" id="nav-actions" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i data-lucide="sliders" class="w-5 h-5"></i>
+                    Gestion & Semestre
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="p-4 border-t border-slate-800">
+            <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-300">Madeleine Portfolio</p>
+                    <p class="text-[10px] text-slate-500">v2.0 • Système Scolaire</p>
+                </div>
+                <i data-lucide="award" class="w-4 h-4 text-brand-500"></i>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Section Gestion des Diplômés pour le Portfolio -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-success text-white">
+        <h6 class="m-0 font-weight-bold">🎓 Espace Gradués & Délivrance des Diplômes (Étape 4)</h6>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Les étudiants de l'Étape 4 ayant validé une moyenne générale $\ge 65\%$ sont éligibles à l'obtention de leur diplôme officiel.</p>
+        
+        <div class="table-responsive">
+            <table class="table table-bordered" id="tableGradues">
+                <thead>
+                    <tr>
+                        <th>N° Étudiant</th>
+                        <th>Nom & Prénom</th>
+                        <th>Moyenne Finale</th>
+                        <th>Date de Graduation</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="listeGraduesBody">
+                    <!-- Les données seront injectées dynamiquement par JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Exemple de logique JavaScript pour générer le diplôme et supprimer l'étudiant de la liste
+    function telechargerDiplome(numEtudiant, prenom, nom) {
+        // 1. Création du contenu du certificat / diplôme
+        const dateJour = new Date().toISOString().slice(0, 10);
+        const contenuDiplome = `=========================================\n` +
+                               `       REPUBLIQUE SCOLAIRE - DIPLÔMÉ     \n` +
+                               `=========================================\n\n` +
+                               `Certificat officiel de fin d'études décernées à :\n\n` +
+                               `  Nom & Prénom : ${nom} ${prenom}\n` +
+                               `  Numéro d'étudiant : ${numEtudiant}\n` +
+                               `  Date d'obtention : ${dateJour}\n\n` +
+                               `Félicitations pour l'obtention du diplôme !\n` +
+                               `=========================================`;
+
+        // 2. Déclenchement du téléchargement du fichier du diplôme
+        const blob = new Blob([contenuDiplome], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Diplome_${nom}_${prenom}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+        // 3. Retrait automatique de l'étudiant de la base de données / affichage front-end
+        supprimerEtudiantDeLaBase(numEtudiant);
+    }
+
+    function supprimerEtudiantDeLaBase(numEtudiant) {
+        // Logique de mise à jour de l'affichage ou appel API vers ton backend Python
+        console.log(`L'étudiant ${numEtudiant} a téléchargé son diplôme et a été retiré de la base.`);
+        alert("Diplôme téléchargé avec succès ! Le dossier de l'étudiant a été archivé et retiré de la base active.");
+        
+        // Exemple de rechargement ou suppression de la ligne HTML correspondante
+        // document.getElementById(`row-${numEtudiant}`).remove();
+    }
+</script>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Tableau de Bord Global</h2>
+                    <p class="text-sm text-slate-400">Aperçu général des résultats scolaires et effectifs du collège.</p>
+                </div>
+                <!-- Quick Filter -->
+                <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+                    <span class="text-xs text-slate-400 pl-2">Filtrer Étape :</span>
+                    <select id="dash-stage-filter" onchange="renderDashboard()" class="bg-slate-800 text-xs text-white rounded px-2 py-1 outline-none border border-slate-700">
+                        <option value="all">Toutes les étapes</option>
+                        <option value="1">Étape 1</option>
+                        <option value="2">Étape 2</option>
+                        <option value="3">Étape 3</option>
+                        <option value="4">Étape 4</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Étudiants</span>
+                        <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-total-students" class="text-3xl font-extrabold text-white mt-2">0</p>
+                    <p class="text-xs text-slate-500 mt-1">Inscrits au registre</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Moyenne Générale</span>
+                        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i data-lucide="trending-up" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-avg-score" class="text-3xl font-extrabold text-white mt-2">0.0%</p>
+                    <p class="text-xs text-slate-500 mt-1">Seuil de réussite: 65%</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Taux d'Admissibilité</span>
+                        <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-pass-rate" class="text-3xl font-extrabold text-white mt-2">0%</p>
+                    <p class="text-xs text-slate-500 mt-1">Étudiants avec Moyenne ≥ 65%</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Étape Majoritaire</span>
+                        <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i data-lucide="layers" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-top-stage" class="text-3xl font-extrabold text-white mt-2">-</p>
+                    <p class="text-xs text-slate-500 mt-1">Niveau le plus fréquenté</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Distribution by Stage -->
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>
+                        Répartition par Étape
+                    </h3>
+                    <div class="relative h-64 w-full flex items-center justify-center">
+                        <canvas id="chart-stages"></canvas>
+                    </div>
+                </div>
+
+                <!-- Performance per Course -->
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-500"></i>
+                        Moyennes par Matière
+                    </h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="chart-courses"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: STUDENTS LIST & DETAIL -->
+        <section id="tab-students" class="tab-content space-y-6 hidden">
+            <!-- Header & Controls -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Registre des Étudiants</h2>
+                    <p class="text-sm text-slate-400">Recherchez, filtrez et consultez le dossier académique complet d'un étudiant.</p>
+                </div>
+                <button onclick="openModal('register-modal')" class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors shadow-lg shadow-brand-600/20">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    Ajouter un étudiant
+                </button>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col sm:flex-row gap-4 justify-between">
+                <!-- Search Box -->
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-500"></i>
+                    <input type="text" id="student-search" oninput="renderStudentsTable()" placeholder="Rechercher par nom, prénom ou N° ID..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                </div>
+                <!-- Filters -->
+                <div class="flex gap-2">
+                    <select id="filter-stage" onchange="renderStudentsTable()" class="bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-lg px-3 py-2 outline-none focus:border-brand-500">
+                        <option value="all">Toutes les étapes</option>
+                        <option value="1">Étape 1</option>
+                        <option value="2">Étape 2</option>
+                        <option value="3">Étape 3</option>
+                        <option value="4">Étape 4</option>
+                    </select>
+                    <select id="filter-status" onchange="renderStudentsTable()" class="bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-lg px-3 py-2 outline-none focus:border-brand-500">
+                        <option value="all">Tous les statuts</option>
+                        <option value="pass">Éligible (≥65%)</option>
+                        <option value="fail">En difficulté (&lt;65%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800/60 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <th class="p-4">N° ID</th>
+                                <th class="p-4">Étudiant</th>
+                                <th class="p-4">Étape Actuelle</th>
+                                <th class="p-4">Moyenne Actuelle</th>
+                                <th class="p-4">Éligibilité</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body" class="divide-y divide-slate-800/50 text-sm">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: COURSES CATALOG -->
+        <section id="tab-courses" class="tab-content space-y-6 hidden">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Catalogue des Cours par Étape</h2>
+                <p class="text-sm text-slate-400">Cliquez sur un cours pour afficher tous les étudiants inscrits et leurs résultats.</p>
+            </div>
+
+            <!-- Stages Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="courses-grid">
+                <!-- Generated Dynamically -->
+            </div>
+
+            <!-- Selected Course Student List -->
+            <div id="course-students-panel" class="bg-slate-900 border border-slate-800 p-6 rounded-xl hidden">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <span id="selected-course-badge" class="text-xs px-2.5 py-1 rounded-full bg-brand-500/20 text-brand-400 font-semibold uppercase">Étape -</span>
+                        <h3 id="selected-course-title" class="text-xl font-bold text-white mt-1">Nom du cours</h3>
+                    </div>
+                    <button onclick="closeCoursePanel()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs uppercase text-slate-400 border-b border-slate-800">
+                                <th class="py-3 px-4">N° ID</th>
+                                <th class="py-3 px-4">Étudiant</th>
+                                <th class="py-3 px-4">Note Obtenue</th>
+                                <th class="py-3 px-4">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="course-students-body" class="divide-y divide-slate-800/50 text-sm">
+                            <!-- Dynamic Course Students -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: ACTIONS & MANAGEMENT -->
+        <section id="tab-actions" class="tab-content space-y-6 hidden">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Gestion Académique & Semestre</h2>
+                <p class="text-sm text-slate-400">Effectuez la transition semestrielle et gérez la base de données scolaire.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Semester Upgrade Card -->
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="p-3 bg-brand-500/10 text-brand-400 w-fit rounded-lg mb-3">
+                            <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Passage de Semestre Automatique</h3>
+                        <p class="text-sm text-slate-400 mt-2">
+                            Simule le passage d'étape. Les étudiants ayant une moyenne <strong>≥ 65%</strong> passent à l'étape suivante (jusqu'à l'étape 4). De nouvelles notes leur sont générées pour leur nouveau cursus.
+                        </p>
+                    </div>
+                    <button onclick="executeSemesterPassage()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        Exécuter la transition de semestre
+                    </button>
+                </div>
+
+                <!-- Database Reset / Seed Card -->
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="p-3 bg-amber-500/10 text-amber-400 w-fit rounded-lg mb-3">
+                            <i data-lucide="refresh-cw" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Réinitialiser avec Données de Test</h3>
+                        <p class="text-sm text-slate-400 mt-2">
+                            Régénère un lot d'étudiants simulés à partir des fichiers <code>Firstnames.txt</code> et <code>Lastnames.txt</code> avec de nouvelles étapes et notes aléatoires.
+                        </p>
+                    </div>
+                    <button onclick="resetData()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        Réinitialiser la Base de Données
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: STUDENT FULL DOSSIER -->
+    <div id="dossier-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center text-lg font-bold" id="dossier-avatar">
+                        --
+                    </div>
+                    <div>
+                        <h3 id="dossier-name" class="text-xl font-bold text-white">Nom de l'étudiant</h3>
+                        <p id="dossier-id" class="text-xs text-slate-400">ID: 300000 • Étape -</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('dossier-modal')" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <!-- Student Stats Bar -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 text-center">
+                        <span class="text-xs text-slate-400 uppercase">Étape Actuelle</span>
+                        <p id="dossier-stage" class="text-xl font-bold text-white mt-1">Étape -</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 text-center">
+                        <span class="text-xs text-slate-400 uppercase">Moyenne Globale</span>
+                        <p id="dossier-avg" class="text-xl font-bold text-emerald-400 mt-1">0.0%</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 text-center">
+                        <span class="text-xs text-slate-400 uppercase">Statut Passage</span>
+                        <p id="dossier-status" class="text-xl font-bold text-white mt-1">-</p>
+                    </div>
+                </div>
+
+                <!-- Academic History (Step by Step) -->
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-brand-500"></i>
+                        Historique des Cours & Notes (Par Étape)
+                    </h4>
+                    <div id="dossier-history" class="space-y-4">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: REGISTER NEW STUDENT -->
+    <div id="register-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <h3 class="text-lg font-bold text-white">Inscrire un Nouvel Étudiant</h3>
+                <button onclick="closeModal('register-modal')" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="register-form" onsubmit="handleRegisterStudent(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Prénom</label>
+                    <input type="text" id="reg-firstname" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nom de famille</label>
+                    <input type="text" id="reg-lastname" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Étape Initiale</label>
+                    <select id="reg-stage" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        <option value="1">Étape 1 (Maths, Anglais, Français)</option>
+                        <option value="2">Étape 2 (Info, SD, Maths A.)</option>
+                        <option value="3">Étape 3 (BD, Programmation, Stats)</option>
+                        <option value="4">Étape 4 (SGBD, Programmation A., Stats A.)</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('register-modal')" class="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-700">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // DATA STRUCTURES
+        const FIRSTNAMES = [
+            "Lacey", "Colette", "Waylon", "Shaniah", "Heidi", "Harley", "Stephanie", "Yahir", 
+            "Leif", "Micah", "Marcellus", "Daxton", "Macie", "Norah", "Ryleigh", "Kenzie", 
+            "Salem", "Blaine", "Julius", "Sterling", "Alfredo", "Yehuda", "Annika", "Morgan",
+            "Madeleine", "Bradley", "Grayson", "Amirah", "Margot", "Santino", "Braylon"
+        ];
+
+        const LASTNAMES = [
+            "Valencia", "Todd", "Payne", "McMahon", "Moss", "Moody", "Walters", "Brooks", 
+            "Townsend", "Crane", "Olsen", "Espinoza", "Wiggins", "Nunez", "Blackwell", "Hudson",
+            "McClure", "Beasley", "Sanford", "McCoy", "McCarthy", "Murphy", "Correa", "Reilly"
+        ];
+
+        const COURSES_BY_STAGE = {
+            "1": ["Maths", "Anglais", "Francais"],
+            "2": ["Info", "SD", "Maths A."],
+            "3": ["BD", "Programmation", "Stats"],
+            "4": ["SGBD", "Programmation A.", "Stats A."]
+        };
+
+        let students = [];
+        let chartStages = null;
+        let chartCourses = null;
+
+        // GAUSSIAN RANDOM GENERATOR FOR REALISTIC GRADES
+        function randomGauss(mean = 75, stdev = 8) {
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            let val = mean + num * stdev;
+            return Math.min(100, Math.max(40, parseFloat(val.toFixed(2))));
+        }
+
+        // INITIALIZE RANDOM STUDENTS
+        function generateInitialStudents(count = 25) {
+            const list = [];
+            let startId = 300000;
+
+            for (let i = 0; i < count; i++) {
+                const currentStage = Math.floor(Math.random() * 4) + 1;
+                const history = {};
+
+                // Generate notes for current stage AND past stages
+                for (let s = 1; s <= currentStage; s++) {
+                    const stageCourses = COURSES_BY_STAGE[s];
+                    const stageGrades = {};
+                    stageCourses.forEach(course => {
+                        stageGrades[course] = randomGauss();
+                    });
+                    history[s] = stageGrades;
+                }
+
+                const student = {
+                    id: startId + i,
+                    firstname: FIRSTNAMES[Math.floor(Math.random() * FIRSTNAMES.length)],
+                    lastname: LASTNAMES[Math.floor(Math.random() * LASTNAMES.length)],
+                    currentStage: currentStage,
+                    history: history
+                };
+
+                list.push(student);
+            }
+            return list;
+        }
+
+        // CALCULATE AVERAGE FOR A SPECIFIC STAGE
+        function getStageAverage(student, stage) {
+            const gradesObj = student.history[stage];
+            if (!gradesObj) return 0;
+            const values = Object.values(gradesObj);
+            const sum = values.reduce((acc, curr) => acc + curr, 0);
+            return parseFloat((sum / values.length).toFixed(2));
+        }
+
+        // CALCULATE OVERALL STUDENT AVERAGE
+        function getOverallAverage(student) {
+            let totalSum = 0;
+            let totalCount = 0;
+            Object.values(student.history).forEach(stageGrades => {
+                Object.values(stageGrades).forEach(grade => {
+                    totalSum += grade;
+                    totalCount++;
+                });
+            });
+            return totalCount ? parseFloat((totalSum / totalCount).toFixed(2)) : 0;
+        }
+
+        // APP INITIALIZATION
+        window.onload = function() {
+            lucide.createIcons();
+            // Load or initialize students
+            const stored = localStorage.getItem('academix_students');
+            if (stored) {
+                students = JSON.parse(stored);
+            } else {
+                students = generateInitialStudents(24);
+                saveData();
+            }
+
+            renderDashboard();
+            renderStudentsTable();
+            renderCoursesCatalog();
+        };
+
+        function saveData() {
+            localStorage.setItem('academix_students', JSON.stringify(students));
+        }
+
+        // TAB NAVIGATION
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-brand-600', 'text-white');
+                el.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            activeBtn.classList.add('bg-brand-600', 'text-white');
+            activeBtn.classList.remove('text-slate-400');
+
+            if (tabName === 'dashboard') renderDashboard();
+            if (tabName === 'students') renderStudentsTable();
+            if (tabName === 'courses') renderCoursesCatalog();
+        }
+
+        // DASHBOARD RENDERER
+        function renderDashboard() {
+            const filterStage = document.getElementById('dash-stage-filter').value;
+            let filteredStudents = students;
+
+            if (filterStage !== 'all') {
+                filteredStudents = students.filter(s => s.currentStage === parseInt(filterStage));
+            }
+
+            // KPIs
+            const totalCount = filteredStudents.length;
+            document.getElementById('kpi-total-students').innerText = totalCount;
+
+            let grandSum = 0;
+            let passingCount = 0;
+
+            filteredStudents.forEach(s => {
+                const avg = getOverallAverage(s);
+                grandSum += avg;
+                if (avg >= 65) passingCount++;
+            });
+
+            const globalAvg = totalCount ? (grandSum / totalCount).toFixed(1) : "0.0";
+            const passRate = totalCount ? Math.round((passingCount / totalCount) * 100) : 0;
+
+            document.getElementById('kpi-avg-score').innerText = `${globalAvg}%`;
+            document.getElementById('kpi-pass-rate').innerText = `${passRate}%`;
+
+            // Stage Counts
+            const stageCounts = {1: 0, 2: 0, 3: 0, 4: 0};
+            students.forEach(s => stageCounts[s.currentStage]++);
+
+            let topStage = "1";
+            let maxC = 0;
+            for (let st in stageCounts) {
+                if (stageCounts[st] > maxC) {
+                    maxC = stageCounts[st];
+                    topStage = st;
+                }
+            }
+            document.getElementById('kpi-top-stage').innerText = `Étape ${topStage}`;
+
+            // Render Charts
+            renderCharts(stageCounts);
+        }
+
+        function renderCharts(stageCounts) {
+            // Doughnut Chart: Stages
+            const ctxStage = document.getElementById('chart-stages').getContext('2d');
+            if (chartStages) chartStages.destroy();
+
+            chartStages = new Chart(ctxStage, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Étape 1', 'Étape 2', 'Étape 3', 'Étape 4'],
+                    datasets: [{
+                        data: [stageCounts[1], stageCounts[2], stageCounts[3], stageCounts[4]],
+                        backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // Bar Chart: Courses Average
+            const courseStats = {};
+            // Init course keys
+            Object.values(COURSES_BY_STAGE).flat().forEach(c => courseStats[c] = { sum: 0, count: 0 });
+
+            students.forEach(s => {
+                Object.values(s.history).forEach(stageGrades => {
+                    Object.entries(stageGrades).forEach(([course, grade]) => {
+                        if (courseStats[course]) {
+                            courseStats[course].sum += grade;
+                            courseStats[course].count++;
+                        }
+                    });
+                });
+            });
+
+            const courseLabels = Object.keys(courseStats);
+            const courseAverages = courseLabels.map(c => 
+                courseStats[c].count ? (courseStats[c].sum / courseStats[c].count).toFixed(1) : 0
+            );
+
+            const ctxCourses = document.getElementById('chart-courses').getContext('2d');
+            if (chartCourses) chartCourses.destroy();
+
+            chartCourses = new Chart(ctxCourses, {
+                type: 'bar',
+                data: {
+                    labels: courseLabels,
+                    datasets: [{
+                        label: 'Moyenne (%)',
+                        data: courseAverages,
+                        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // STUDENTS TABLE RENDERER
+        function renderStudentsTable() {
+            const search = document.getElementById('student-search').value.toLowerCase();
+            const stageFilter = document.getElementById('filter-stage').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = students.filter(s => {
+                const fullName = `${s.firstname} ${s.lastname}`.toLowerCase();
+                const matchesSearch = fullName.includes(search) || s.id.toString().includes(search);
+                const matchesStage = stageFilter === 'all' || s.currentStage === parseInt(stageFilter);
+
+                const avg = getOverallAverage(s);
+                const matchesStatus = statusFilter === 'all' || 
+                                     (statusFilter === 'pass' && avg >= 65) || 
+                                     (statusFilter === 'fail' && avg < 65);
+
+                return matchesSearch && matchesStage && matchesStatus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Aucun étudiant trouvé.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(s => {
+                const avg = getOverallAverage(s);
+                const isPass = avg >= 65;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-xs text-slate-400">#${s.id}</td>
+                    <td class="p-4 font-medium text-white">${s.firstname} ${s.lastname}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-300">Étape ${s.currentStage}</span></td>
+                    <td class="p-4 font-bold ${isPass ? 'text-emerald-400' : 'text-rose-400'}">${avg}%</td>
+                    <td class="p-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${isPass ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
+                            <span class="w-1.5 h-1.5 rounded-full ${isPass ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
+                            ${isPass ? 'Admissible (≥65%)' : 'Ajourné (<65%)'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="openDossier(${s.id})" class="text-xs bg-brand-600/20 hover:bg-brand-600 text-brand-300 hover:text-white px-3 py-1.5 rounded-lg border border-brand-500/30 transition-colors">
+                            Voir Dossier
+                        </button>
+                        <button onclick="deleteStudent(${s.id})" class="text-xs bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white p-1.5 rounded-lg border border-rose-500/20 transition-colors">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        // DOSSIER MODAL
+        function openDossier(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            document.getElementById('dossier-name').innerText = `${student.firstname} ${student.lastname}`;
+            document.getElementById('dossier-id').innerText = `ID: #${student.id} • Inscrit au Collège`;
+            document.getElementById('dossier-avatar').innerText = `${student.firstname[0]}${student.lastname[0]}`;
+            document.getElementById('dossier-stage').innerText = `Étape ${student.currentStage}`;
+
+            const overallAvg = getOverallAverage(student);
+            document.getElementById('dossier-avg').innerText = `${overallAvg}%`;
+            
+            const isPass = overallAvg >= 65;
+            const statusEl = document.getElementById('dossier-status');
+            statusEl.innerText = isPass ? "Éligible Passage" : "À Renforcer";
+            statusEl.className = `text-xl font-bold mt-1 ${isPass ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            // Render History
+            const historyContainer = document.getElementById('dossier-history');
+            historyContainer.innerHTML = '';
+
+            // Loop through completed & current stages
+            for (let st = 1; st <= student.currentStage; st++) {
+                const stageGrades = student.history[st];
+                const stageAvg = getStageAverage(student, st);
+                
+                const card = document.createElement('div');
+                card.className = "bg-slate-800/40 border border-slate-700/60 rounded-xl p-4 space-y-3";
+
+                let rowsHtml = '';
+                if (stageGrades) {
+                    Object.entries(stageGrades).forEach(([course, grade]) => {
+                        rowsHtml += `
+                            <div class="flex items-center justify-between py-1 border-b border-slate-700/30 last:border-0 text-sm">
+                                <span class="text-slate-300">${course}</span>
+                                <span class="font-semibold ${grade >= 65 ? 'text-slate-200' : 'text-rose-400'}">${grade}%</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-700">
+                        <span class="text-xs font-bold text-brand-400 uppercase tracking-wider">Étape ${st} ${st === student.currentStage ? '(En cours)' : '(Terminée)'}</span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-200">Moyenne Étape: <strong>${stageAvg}%</strong></span>
+                    </div>
+                    <div class="space-y-1">
+                        ${rowsHtml}
+                    </div>
+                `;
+                historyContainer.appendChild(card);
+            }
+
+            openModal('dossier-modal');
+        }
+
+        // COURSES CATALOGUE RENDERER
+        function renderCoursesCatalog() {
+            const grid = document.getElementById('courses-grid');
+            grid.innerHTML = '';
+
+            Object.entries(COURSES_BY_STAGE).forEach(([stage, courses]) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4";
+                
+                let courseButtons = '';
+                courses.forEach(c => {
+                    courseButtons += `
+                        <button onclick="selectCourse('${c}', '${stage}')" class="w-full text-left p-3 rounded-lg bg-slate-800/60 hover:bg-brand-600/20 hover:border-brand-500/40 border border-slate-700/50 transition-all flex items-center justify-between group">
+                            <span class="text-sm font-medium text-slate-200 group-hover:text-brand-300">${c}</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-brand-400"></i>
+                        </button>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="font-bold text-white">Étape ${stage}</h3>
+                        <span class="text-xs text-slate-500">${courses.length} Matières</span>
+                    </div>
+                    <div class="space-y-2">
+                        ${courseButtons}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // SHOW STUDENTS REGISTERED IN A COURSE
+        function selectCourse(courseName, stage) {
+            const panel = document.getElementById('course-students-panel');
+            const title = document.getElementById('selected-course-title');
+            const badge = document.getElementById('selected-course-badge');
+            const tbody = document.getElementById('course-students-body');
+
+            title.innerText = `Étudiants inscrits en ${courseName}`;
+            badge.innerText = `Étape ${stage}`;
+            tbody.innerHTML = '';
+
+            // Find all students who took or are taking this course
+            const enrolled = [];
+            students.forEach(s => {
+                if (s.history[stage] && s.history[stage][courseName] !== undefined) {
+                    enrolled.push({
+                        student: s,
+                        grade: s.history[stage][courseName]
+                    });
+                }
+            });
+
+            if (enrolled.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-500">Aucun étudiant inscrit à ce cours pour le moment.</td></tr>`;
+            } else {
+                enrolled.forEach(item => {
+                    const isPass = item.grade >= 65;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/30";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-mono text-xs text-slate-400">#${item.student.id}</td>
+                        <td class="py-3 px-4 font-medium text-white">${item.student.firstname} ${item.student.lastname}</td>
+                        <td class="py-3 px-4 font-bold ${isPass ? 'text-emerald-400' : 'text-rose-400'}">${item.grade}%</td>
+                        <td class="py-3 px-4">
+                            <span class="text-xs px-2 py-0.5 rounded ${isPass ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+                                ${isPass ? 'Réussi' : 'Échec'}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            panel.classList.remove('hidden');
+            panel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeCoursePanel() {
+            document.getElementById('course-students-panel').classList.add('hidden');
+        }
+
+        // ACTIONS: REGISTER STUDENT
+        function handleRegisterStudent(e) {
+            e.preventDefault();
+            const firstname = document.getElementById('reg-firstname').value.trim();
+            const lastname = document.getElementById('reg-lastname').value.trim();
+            const stage = parseInt(document.getElementById('reg-stage').value);
+
+            if (!firstname || !lastname) return;
+
+            const nextId = students.length ? Math.max(...students.map(s => s.id)) + 1 : 300000;
+            const history = {};
+
+            // Generate grades up to selected stage
+            for (let s = 1; s <= stage; s++) {
+                const stageGrades = {};
+                COURSES_BY_STAGE[s].forEach(c => stageGrades[c] = randomGauss());
+                history[s] = stageGrades;
+            }
+
+            const newStudent = {
+                id: nextId,
+                firstname: firstname,
+                lastname: lastname,
+                currentStage: stage,
+                history: history
+            };
+
+            students.unshift(newStudent);
+            saveData();
+            closeModal('register-modal');
+            renderStudentsTable();
+            document.getElementById('register-form').reset();
+        }
+
+        // ACTIONS: SEMESTER PASSAGE SIMULATION
+        function executeSemesterPassage() {
+            let promotedCount = 0;
+
+            students.forEach(s => {
+                const currentAvg = getStageAverage(s, s.currentStage);
+                // Can promote if average >= 65 and currentStage < 4
+                if (currentAvg >= 65 && s.currentStage < 4) {
+                    s.currentStage += 1;
+                    promotedCount++;
+                    
+                    // Generate new grades for the new stage
+                    const newStageGrades = {};
+                    COURSES_BY_STAGE[s.currentStage].forEach(c => newStageGrades[c] = randomGauss());
+                    s.history[s.currentStage] = newStageGrades;
+                }
+            });
+
+            saveData();
+            renderDashboard();
+            renderStudentsTable();
+            alert(`Simulation de passage de semestre terminée !\n${promotedCount} étudiant(s) promu(s) à l'étape supérieure.`);
+        }
+
+        // ACTIONS: DELETE STUDENT
+        function deleteStudent(studentId) {
+            students = students.filter(s => s.id !== studentId);
+            saveData();
+            renderStudentsTable();
+            renderDashboard();
+        }
+
+        // ACTIONS: RESET DATA
+        function resetData() {
+            students = generateInitialStudents(24);
+            saveData();
+            renderDashboard();
+            renderStudentsTable();
+            renderCoursesCatalog();
+            alert("La base de données a été réinitialisée avec succès !");
+        }
+
+        // UTILITY: MODAL CONTROL
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

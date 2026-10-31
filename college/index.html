@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Académique - Système de Notation</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
+        <div>
+            <!-- Header Logo -->
+            <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+                <div class="bg-brand-600 p-2.5 rounded-xl text-white shadow-lg shadow-brand-500/30">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-white">Academy</h1>
+                    <p class="text-xs text-slate-400">Système de Notation</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-4 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors bg-brand-600 text-white">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Tableau de Bord
+                </button>
+                <button onclick="switchTab('students')" id="nav-students" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Étudiants & Dossiers
+                </button>
+                <button onclick="switchTab('courses')" id="nav-courses" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    Catalogue des Cours
+                </button>
+                <button onclick="switchTab('actions')" id="nav-actions" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+                    <i data-lucide="sliders" class="w-5 h-5"></i>
+                    Gestion & Semestre
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="p-4 border-t border-slate-800">
+            <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-300">Madeleine Portfolio</p>
+                    <p class="text-[10px] text-slate-500">v2.0 • Système Scolaire</p>
+                </div>
+                <i data-lucide="award" class="w-4 h-4 text-brand-500"></i>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Tableau de Bord Global</h2>
+                    <p class="text-sm text-slate-400">Aperçu général des résultats scolaires et effectifs du collège.</p>
+                </div>
+                <!-- Quick Filter -->
+                <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+                    <span class="text-xs text-slate-400 pl-2">Filtrer Étape :</span>
+                    <select id="dash-stage-filter" onchange="renderDashboard()" class="bg-slate-800 text-xs text-white rounded px-2 py-1 outline-none border border-slate-700">
+                        <option value="all">Toutes les étapes</option>
+                        <option value="1">Étape 1</option>
+                        <option value="2">Étape 2</option>
+                        <option value="3">Étape 3</option>
+                        <option value="4">Étape 4</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Étudiants</span>
+                        <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-total-students" class="text-3xl font-extrabold text-white mt-2">0</p>
+                    <p class="text-xs text-slate-500 mt-1">Inscrits au registre</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Moyenne Générale</span>
+                        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i data-lucide="trending-up" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-avg-score" class="text-3xl font-extrabold text-white mt-2">0.0%</p>
+                    <p class="text-xs text-slate-500 mt-1">Seuil de réussite: 65%</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Taux d'Admissibilité</span>
+                        <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><i data-lucide="check-circle-2" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-pass-rate" class="text-3xl font-extrabold text-white mt-2">0%</p>
+                    <p class="text-xs text-slate-500 mt-1">Étudiants avec Moyenne ≥ 65%</p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Étape Majoritaire</span>
+                        <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i data-lucide="layers" class="w-5 h-5"></i></div>
+                    </div>
+                    <p id="kpi-top-stage" class="text-3xl font-extrabold text-white mt-2">-</p>
+                    <p class="text-xs text-slate-500 mt-1">Niveau le plus fréquenté</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Distribution by Stage -->
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>
+                        Répartition par Étape
+                    </h3>
+                    <div class="relative h-64 w-full flex items-center justify-center">
+                        <canvas id="chart-stages"></canvas>
+                    </div>
+                </div>
+
+                <!-- Performance per Course -->
+                <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+                    <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-500"></i>
+                        Moyennes par Matière
+                    </h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="chart-courses"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: STUDENTS LIST & DETAIL -->
+        <section id="tab-students" class="tab-content space-y-6 hidden">
+            <!-- Header & Controls -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Registre des Étudiants</h2>
+                    <p class="text-sm text-slate-400">Recherchez, filtrez et consultez le dossier académique complet d'un étudiant.</p>
+                </div>
+                <button onclick="openModal('register-modal')" class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors shadow-lg shadow-brand-600/20">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    Ajouter un étudiant
+                </button>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col sm:flex-row gap-4 justify-between">
+                <!-- Search Box -->
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-500"></i>
+                    <input type="text" id="student-search" oninput="renderStudentsTable()" placeholder="Rechercher par nom, prénom ou N° ID..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                </div>
+                <!-- Filters -->
+                <div class="flex gap-2">
+                    <select id="filter-stage" onchange="renderStudentsTable()" class="bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-lg px-3 py-2 outline-none focus:border-brand-500">
+                        <option value="all">Toutes les étapes</option>
+                        <option value="1">Étape 1</option>
+                        <option value="2">Étape 2</option>
+                        <option value="3">Étape 3</option>
+                        <option value="4">Étape 4</option>
+                    </select>
+                    <select id="filter-status" onchange="renderStudentsTable()" class="bg-slate-800 border border-slate-700 text-sm text-slate-200 rounded-lg px-3 py-2 outline-none focus:border-brand-500">
+                        <option value="all">Tous les statuts</option>
+                        <option value="pass">Éligible (≥65%)</option>
+                        <option value="fail">En difficulté (&lt;65%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800/60 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <th class="p-4">N° ID</th>
+                                <th class="p-4">Étudiant</th>
+                                <th class="p-4">Étape Actuelle</th>
+                                <th class="p-4">Moyenne Actuelle</th>
+                                <th class="p-4">Éligibilité</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body" class="divide-y divide-slate-800/50 text-sm">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: COURSES CATALOG -->
+        <section id="tab-courses" class="tab-content space-y-6 hidden">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Catalogue des Cours par Étape</h2>
+                <p class="text-sm text-slate-400">Cliquez sur un cours pour afficher tous les étudiants inscrits et leurs résultats.</p>
+            </div>
+
+            <!-- Stages Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="courses-grid">
+                <!-- Generated Dynamically -->
+            </div>
+
+            <!-- Selected Course Student List -->
+            <div id="course-students-panel" class="bg-slate-900 border border-slate-800 p-6 rounded-xl hidden">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <span id="selected-course-badge" class="text-xs px-2.5 py-1 rounded-full bg-brand-500/20 text-brand-400 font-semibold uppercase">Étape -</span>
+                        <h3 id="selected-course-title" class="text-xl font-bold text-white mt-1">Nom du cours</h3>
+                    </div>
+                    <button onclick="closeCoursePanel()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs uppercase text-slate-400 border-b border-slate-800">
+                                <th class="py-3 px-4">N° ID</th>
+                                <th class="py-3 px-4">Étudiant</th>
+                                <th class="py-3 px-4">Note Obtenue</th>
+                                <th class="py-3 px-4">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="course-students-body" class="divide-y divide-slate-800/50 text-sm">
+                            <!-- Dynamic Course Students -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: ACTIONS & MANAGEMENT -->
+        <section id="tab-actions" class="tab-content space-y-6 hidden">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Gestion Académique & Semestre</h2>
+                <p class="text-sm text-slate-400">Effectuez la transition semestrielle, gérez les diplômes et la base de données.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Semester Upgrade Card -->
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="p-3 bg-brand-500/10 text-brand-400 w-fit rounded-lg mb-3">
+                            <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Passage de Semestre Automatique</h3>
+                        <p class="text-sm text-slate-400 mt-2">
+                            Simule le passage d'étape. Les étudiants ayant une moyenne <strong>≥ 65%</strong> passent à l'étape suivante (jusqu'à l'étape 4).
+                        </p>
+                    </div>
+                    <button onclick="executeSemesterPassage()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        Exécuter la transition de semestre
+                    </button>
+                </div>
+
+                <!-- Database Reset / Seed Card -->
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="p-3 bg-amber-500/10 text-amber-400 w-fit rounded-lg mb-3">
+                            <i data-lucide="refresh-cw" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Réinitialiser avec Données de Test</h3>
+                        <p class="text-sm text-slate-400 mt-2">
+                            Régénère un lot d'étudiants simulés avec de nouvelles étapes et notes aléatoires.
+                        </p>
+                    </div>
+                    <button onclick="resetData()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-medium py-3 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        Réinitialiser la Base de Données
+                    </button>
+                </div>
+            </div>
+
+            <!-- ESPACE GRADUÉS & DÉLIVRANCE DES DIPLÔMES (Étape 4) -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i data-lucide="award" class="w-5 h-5 text-emerald-400"></i>
+                        Espace Gradués & Délivrance des Diplômes (Étape 4)
+                    </h3>
+                </div>
+                <p class="text-sm text-slate-400">Les étudiants de l'Étape 4 ayant validé une moyenne générale &ge; 65% sont éligibles à l'obtention de leur diplôme officiel.</p>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs uppercase text-slate-400 border-b border-slate-800">
+                                <th class="py-3 px-4">N° Étudiant</th>
+                                <th class="py-3 px-4">Nom & Prénom</th>
+                                <th class="py-3 px-4">Moyenne Finale</th>
+                                <th class="py-3 px-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listeGraduesBody" class="divide-y divide-slate-800/50 text-sm">
+                            <!-- Injecté dynamiquement par app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: STUDENT FULL DOSSIER -->
+    <div id="dossier-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-brand-600/20 text-brand-400 border border-brand-500/30 flex items-center justify-center text-lg font-bold" id="dossier-avatar">
+                        --
+                    </div>
+                    <div>
+                        <h3 id="dossier-name" class="text-xl font-bold text-white">Nom de l'étudiant</h3>
+                        <p id="dossier-id" class="text-xs text-slate-400">ID: 300000 • Étape -</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('dossier-modal')" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 text-center">
+                        <span class="text-xs text-slate-400 uppercase">Étape Actuelle</span>
+                        <p id="dossier-stage" class="text-xl font-bold text-white mt-1">Étape -</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 text-center">
+                        <span class="text-xs text-slate-400 uppercase">Moyenne Globale</span>
+                        <p id="dossier-avg" class="text-xl font-bold text-emerald-400 mt-1">0.0%</p>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 text-center">
+                        <span class="text-xs text-slate-400 uppercase">Statut Passage</span>
+                        <p id="dossier-status" class="text-xl font-bold text-white mt-1">-</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-brand-500"></i>
+                        Historique des Cours & Notes (Par Étape)
+                    </h4>
+                    <div id="dossier-history" class="space-y-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: REGISTER NEW STUDENT -->
+    <div id="register-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <h3 class="text-lg font-bold text-white">Inscrire un Nouvel Étudiant</h3>
+                <button onclick="closeModal('register-modal')" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="register-form" onsubmit="handleRegisterStudent(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Prénom</label>
+                    <input type="text" id="reg-firstname" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nom de famille</label>
+                    <input type="text" id="reg-lastname" required class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Étape Initiale</label>
+                    <select id="reg-stage" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                        <option value="1">Étape 1 (Maths, Anglais, Français)</option>
+                        <option value="2">Étape 2 (Info, SD, Maths A.)</option>
+                        <option value="3">Étape 3 (BD, Programmation, Stats)</option>
+                        <option value="4">Étape 4 (SGBD, Programmation A., Stats A.)</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('register-modal')" class="px-4 py-2 bg-slate-800 text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-700">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EXTERNAL JAVASCRIPT -->
+    <script src="app.js"></script>
+</body>
+</html>

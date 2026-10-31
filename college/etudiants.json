@@ -1,0 +1,223 @@
+[
+    {
+        "id": 300002,
+        "firstname": "Eliseo",
+        "lastname": "Roman",
+        "currentStage": 3,
+        "history": {
+            "3": {
+                "BD": 0.0,
+                "Programmation": 0.0,
+                "Stats": 0.0
+            }
+        }
+    },
+    {
+        "id": 300004,
+        "firstname": "Emmaline",
+        "lastname": "Fernandez",
+        "currentStage": 4,
+        "history": {
+            "4": {
+                "SGBD": 0.0,
+                "Programmation A.": 0.0,
+                "Stats A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300005,
+        "firstname": "Morgan",
+        "lastname": "Henderson",
+        "currentStage": 2,
+        "history": {
+            "2": {
+                "Info": 0.0,
+                "SD": 0.0,
+                "Maths A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300006,
+        "firstname": "Caroline",
+        "lastname": "Benton",
+        "currentStage": 2,
+        "history": {
+            "2": {
+                "Info": 0.0,
+                "SD": 0.0,
+                "Maths A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300007,
+        "firstname": "Leandro",
+        "lastname": "Rodgers",
+        "currentStage": 4,
+        "history": {
+            "4": {
+                "SGBD": 0.0,
+                "Programmation A.": 0.0,
+                "Stats A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300008,
+        "firstname": "Bryce",
+        "lastname": "Case",
+        "currentStage": 4,
+        "history": {
+            "4": {
+                "SGBD": 0.0,
+                "Programmation A.": 0.0,
+                "Stats A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300009,
+        "firstname": "Camila",
+        "lastname": "Morse",
+        "currentStage": 4,
+        "history": {
+            "4": {
+                "SGBD": 0.0,
+                "Programmation A.": 0.0,
+                "Stats A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300010,
+        "firstname": "Jaiden",
+        "lastname": "Stout",
+        "currentStage": 2,
+        "history": {
+            "2": {
+                "Info": 0.0,
+                "SD": 0.0,
+                "Maths A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300011,
+        "firstname": "Khari",
+        "lastname": "Hanson",
+        "currentStage": 2,
+        "history": {
+            "2": {
+                "Info": 0.0,
+                "SD": 0.0,
+                "Maths A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300012,
+        "firstname": "Tanner",
+        "lastname": "Roy",
+        "currentStage": 3,
+        "history": {
+            "3": {
+                "BD": 0.0,
+                "Programmation": 0.0,
+                "Stats": 0.0
+            }
+        }
+    },
+    {
+        "id": 300014,
+        "firstname": "Eduardo",
+        "lastname": "Fletcher",
+        "currentStage": 2,
+        "history": {
+            "2": {
+                "Info": 0.0,
+                "SD": 0.0,
+                "Maths A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300015,
+        "firstname": "Aidan",
+        "lastname": "Villegas",
+        "currentStage": 3,
+        "history": {
+            "3": {
+                "BD": 0.0,
+                "Programmation": 0.0,
+                "Stats": 0.0
+            }
+        }
+    },
+    {
+        "id": 300016,
+        "firstname": "Hallie",
+        "lastname": "Hogan",
+        "currentStage": 3,
+        "history": {
+            "3": {
+                "BD": 0.0,
+                "Programmation": 0.0,
+                "Stats": 0.0
+            }
+        }
+    },
+    {
+        "id": 300017,
+        "firstname": "Skyla",
+        "lastname": "Compton",
+        "currentStage": 2,
+        "history": {
+            "2": {
+                "Info": 0.0,
+                "SD": 0.0,
+                "Maths A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300018,
+        "firstname": "Darian",
+        "lastname": "Kirk",
+        "currentStage": 3,
+        "history": {
+            "3": {
+                "BD": 0.0,
+                "Programmation": 0.0,
+                "Stats": 0.0
+            }
+        }
+    },
+    {
+        "id": 300020,
+        "firstname": "Ermias",
+        "lastname": "Delgado",
+        "currentStage": 2,
+        "history": {
+            "2": {
+                "Info": 0.0,
+                "SD": 0.0,
+                "Maths A.": 0.0
+            }
+        }
+    },
+    {
+        "id": 300021,
+        "firstname": "Joseph",
+        "lastname": "reme",
+        "currentStage": 4,
+        "history": {
+            "4": {
+                "SGBD": 0.0,
+                "Programmation A.": 0.0,
+                "Stats A.": 0.0
+            }
+        }
+    }
+]
